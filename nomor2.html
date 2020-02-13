@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        table,tr,th,td{
+            border: 1px solid orangered;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1>Madding</h1>
+        Username : <input type="text" id="username" placeholder="masukkan nama"><br><br>
+        Password : <input type="password" id="password" placeholder="masukkan password"><br><br>
+        <button onclick="login()" id="teslogin">Login</button><br><br>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Kegiatan</th>
+                    <th>Hari</th>
+                    <th>Poster</th>
+                    <th>Act</th>
+                </tr>
+            </thead>
+            <tbody id="1">
+
+            </tbody>
+            <tfoot id="2">
+
+            </tfoot>         
+        </table><br>
+        <p id="isi"></p><br>
+        <p id="logout"></p>
+    </center>
+</body>
+<script>
+    class User{
+        constructor(username,password,role){
+            this.username=username,
+            this.password=password,
+            this.role=role
+        }
+    }
+
+    var datauser=[
+        new User('Admin','123','admin'),
+        new User('Dino','1234','user')
+    ]
+
+    class Todo{
+        constructor(kegiatan,hari,gambar){
+            this.kegiatan=kegiatan,
+            this.hari=hari,
+            this.gambar=gambar
+        }
+    }
+
+    var data=[
+        new Todo('lari','senin','https://www.femina.co.id/images/images/PERSIAPAN%20LARI.jpg'),
+        new Todo('shopping','selasa','https://www.parkgrandpaddingtoncourt.co.uk/blog/wp-content/uploads/2017/10/Shopping.jpg')
+    ]
+
+    const logout=()=>{
+        cekdata=[]
+        userlogin=[]                                    
+        document.getElementById('username').value=''
+        document.getElementById('password').value=''
+        document.getElementById('isi').innerHTML=''     
+        document.getElementsByTagName('tbody')[0].innerHTML=''
+        document.getElementsByTagName('tfoot')[0].innerHTML=''
+        document.getElementById('logout').innerHTML=''
+    }
+
+    var userlogin=[]
+    var cekdata=[]
+    var salah=0
+    const login=()=>{
+        var username=document.getElementById('username').value
+        var password=document.getElementById('password').value
+        if(username&&password){
+            cekdata=datauser.filter((val)=>val.username==username && val.password==password)
+            if(cekdata.length===1){
+                if(cekdata[0].role=='admin'){
+                    userlogin=cekdata[0]
+                    printdata()
+                    printtfoot()
+                    document.getElementById('username').value=''
+                    document.getElementById('password').value=''
+                    document.getElementById('isi').innerHTML=`<h2>${cekdata[0].username}</h2>`
+                    document.getElementById('logout').innerHTML=`<button onclick="logout()">Logout</button>`
+                }else{
+                    document.getElementById('username').value=''
+                    document.getElementById('password').value=''
+                    document.getElementById('isi').innerHTML=`<h2>${cekdata[0].username}</h2>`
+                    document.getElementById('logout').innerHTML=`<button onclick="logout()">Logout</button>`
+                    printuser()
+                }
+            }else if(password!=datauser.password){
+                document.getElementById('isi').innerHTML='<h2>Password Salah</h2>'
+            }else{
+                if(salah===0){
+                    document.getElementById('isi').innerHTML='<h2>User tidak ada</h2>'
+                }else{
+                    document.getElementById('isi').innerHTML='<h2>registraasi dulu</h2>'
+                }
+                salah++
+            }
+        }else{
+            document.getElementById('isi').innerHTML='<h2>Masukkan password atau username</h2>'
+        }
+}
+
+    var indexdelete=-1
+    var indexedit=-1
+    const printdata=()=>{
+        var output=''
+        data.forEach((val,index)=>{
+            if(index==indexdelete){
+                output+=`   <tr>
+                                <td>${index+1}</td>
+                                <td>${val.kegiatan}</td>
+                                <td>${val.hari}</td>
+                                <td><img src=${val.gambar} alt=${index} height='200px'></td>
+                                <td>
+                                    <button onclick="acceptDelete(${index})">Yes</button>
+                                    <button onclick="canceldelete()">No</button>
+                                </td>
+                            </tr>
+                            `
+            }else if(index==indexedit){
+                output+=`   <tr>
+                                <td>${index+1}</td>
+                                <td><input type="text" id='editkegiatan' placeholder="nama kegiatan" value=${data[indexedit].kegiatan}></td>
+                                <td>
+                                    <select id="edithari" >
+                                        <option hidden value="">pilih hari ..</option>
+                                        <option value="senin">senin</option>
+                                        <option value="selasa">selasa</option>
+                                        <option value="rabu">rabu</option>
+                                        <option value="kamis">kamis</option>
+                                        <option value="jumat">jumat</option>
+                                        <option value="sabtu">sabtu</option>
+                                        <option value="minggu">minggu</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" id='editgambar' placeholder="Gambar" value=${data[indexedit].gambar}></td>
+                                <td>
+                                    <button onclick="updatedata(${index})">Save</button>
+                                    <button onclick="cancelupdatedata()">Cancel</button>
+                            </tr>`
+            }
+            else{
+                output+=`   <tr>
+                                <td>${index+1}</td>
+                                <td>${val.kegiatan}</td>
+                                <td>${val.hari}</td>
+                                <td><img src=${val.gambar} alt=${index} height='200px'></td>
+                                <td>
+                                    <button onclick="editkegiatan(${index})">edit</button>
+                                    <button onclick="deletekegiatan(${index})">delete</button>
+                                </td>
+                            </tr>`
+            }
+        })
+        document.getElementsByTagName('tbody')[0].innerHTML=output
+    }
+
+    const printtfoot=()=>{
+        var output=`<tr>
+                    <td></td>
+                    <td><input type="text" id='kegiatan' placeholder="nama kegiatan"></td>
+                    <td>
+                        <select id="hari">
+                            <option hidden value="">pilih hari ..</option>
+                            <option value="senin">senin</option>
+                            <option value="selasa">selasa</option>
+                            <option value="rabu">rabu</option>
+                            <option value="kamis">kamis</option>
+                            <option value="jumat">jumat</option>
+                            <option value="sabtu">sabtu</option>
+                            <option value="minggu">minggu</option>
+                        </select>
+                    </td>
+                    <td><input type="text" id='gambar' placeholder="Gambar"></td>
+                    <td><button onclick="inputdataonClick()">input data</button></td>
+                </tr>`
+        document.getElementsByTagName('tfoot')[0].innerHTML=output
+    }
+
+    const printuser=()=>{
+        var output=''
+        data.forEach((val,index)=>{
+            output+=`   <tr>
+                            <td>${index+1}</td>
+                            <td>${val.kegiatan}</td>
+                            <td>${val.hari}</td>
+                            <td><img src=${val.gambar} alt=${index} height='200px'></td>
+                            <td></td>
+                        </tr>`
+        })
+        document.getElementsByTagName('tbody')[0].innerHTML=output
+    }
+
+    const editkegiatan=(indexed)=>{
+        indexedit=indexed
+        printdata()
+    }
+
+    const updatedata=(indexed)=>{
+        var newkegiatan=document.getElementById('editkegiatan').value
+        var newimage=document.getElementById('editgambar').value
+        var newhari=document.getElementById('edithari').value
+        if(newhari===''){
+            newhari=data[indexed].hari
+        }
+        if(newimage===''){
+            newimage=data[indexed].gambar
+        }
+        if(newkegiatan===''){
+            newkegiatan=data[indexed].kegiatan
+        }
+        data.splice(indexed,1,new Todo(newkegiatan,newhari,newimage))
+        indexedit=-1
+        printdata()
+    }
+
+    const cancelupdatedata=()=>{
+        indexedit=-1
+        printdata()
+    }
+
+    const deletekegiatan=(indexdel)=>{
+        indexdelete=indexdel
+        printdata()
+    }
+    const acceptDelete=(indexdel)=>{
+        data.splice(indexdel,1)
+        indexdelete=-1
+        printdata()
+
+    }
+    const canceldelete=()=>{
+        indexdelete=-1
+        printdata()
+    }
+
+    const inputdataonClick=()=>{
+        var kegiatan=document.getElementById('kegiatan').value
+        var gambar=document.getElementById('gambar').value
+        var hari=document.getElementById('hari').value
+        if(kegiatan==''||gambar==''||hari==''){
+            alert('coba input semua dulu')
+        }else{
+            data.push(new Todo(kegiatan,hari,gambar))
+            document.getElementById('kegiatan').value=''
+            document.getElementById('gambar').value=''
+            document.getElementById('hari').value=''
+            printdata()
+        }
+    }    
+</script>
+</html>
